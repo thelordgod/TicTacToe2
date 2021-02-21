@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using static System.Int32;
 
 namespace TicTacToe
@@ -22,6 +23,7 @@ namespace TicTacToe
                     DrawBoard();
                     break;
                 }
+
                 _currentPlayer = _currentPlayer == Player.One ? Player.Two : Player.One;
             } while (_board.squareStatus.ContainsValue(Status.Empty));
 
@@ -78,19 +80,20 @@ namespace TicTacToe
 
         private static void ChangeField(ConsoleKeyInfo input)
         {
-            TryParse(input.Key.ToString().Remove(0, 1), out int result);
-            if (result >= 1 && result <= 9)
+            int inputKey = Parse(Regex.Replace
+                (input.Key.ToString(), "[^1-9]", "0"));
+            if (inputKey == 0)
             {
-                ProcessField(result);
+                HandleInvalidInput();
                 return;
             }
 
-            HandleInvalidInput();
+            ProcessField(inputKey);
         }
 
         private static void HandleInvalidInput(string message = "Invalid input. Try again.")
         {
-            Console.WriteLine(message);
+            Console.WriteLine("\n" + message);
             ReadMove();
         }
 
@@ -112,14 +115,12 @@ namespace TicTacToe
         {
             var builder = new StringBuilder();
 
-            for (int i = 1; i <= 3; i++)
+            for (int i = 1; i <= 9; i++)
+            {
                 builder.Append(GetFieldValue(i));
-            builder.AppendLine();
-            for (int i = 4; i <= 6; i++)
-                builder.Append(GetFieldValue(i));
-            builder.AppendLine();
-            for (int i = 7; i <= 9; i++)
-                builder.Append(GetFieldValue(i));
+                if (i % 3 == 0 && i < 9)
+                    builder.AppendLine();
+            }
 
             Console.WriteLine(builder);
         }
